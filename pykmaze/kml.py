@@ -17,14 +17,14 @@ class KmlDoc(object):
         self.doc = ET.SubElement(self.root, 'Document')
         self.placemark = ET.SubElement(self.doc, 'Placemark')
         ET.SubElement(self.placemark, 'name').text = name
-        
+
     def _add_linestyle(self, **kwargs):
         sid = '_'.join(['%s%s' % (k,v) for (k,v) in kwargs.items()])
         if sid not in self.linestyles:
             self.linestyles[sid] = kwargs.copy()
         return sid
-        
-    def add_trackpoints(self, trackpoint, zoffset=0, extrude=True, 
+
+    def add_trackpoints(self, trackpoint, zoffset=0, extrude=True,
                         tessellate=True):
         if isinstance(trackpoint, tuple):
             trackpoint = [trackpoint]
@@ -35,10 +35,10 @@ class KmlDoc(object):
         ET.SubElement(ls, 'tessellate').text = tessellate and '1' or '0'
         ET.SubElement(ls, 'altitudeMode').text = 'absolute'
         coord = ET.SubElement(ls, 'coordinates')
-        coord.text = '\n'.join([','.join(map(str, 
+        coord.text = '\n'.join([','.join(map(str,
                                              (tp[1],tp[0],tp[2]+zoffset))) \
                                     for tp in trackpoint])
-            
+
     def write(self, out):
         out.write('<?xml version="1.0" encoding="UTF-8"?>')
         for (sid, props) in self.linestyles.items():

@@ -25,12 +25,12 @@ class GpxDoc(object):
         #dist.get_metadata('PKG-INFO')
         #pykmaze_ver = get_pkginfo(core).get('version', VERSION)
         pykmaze_ver = "v1.0"
-        self.root.set('creator', 
+        self.root.set('creator',
                       'PyKmaze %s - http://pykmaze.googlecode.com' % \
                       pykmaze_ver)
         self.root.set('xmlns:xsi', 'http://www.w3.org/2001/XMLSchema-instance')
         self.root.set('xmlns', 'http://www.topografix.com/GPX/1/0')
-        self.root.set('xsi:schemaLocation', 
+        self.root.set('xsi:schemaLocation',
                       'http://www.topografix.com/GPX/1/0 '
                       'http://www.topografix.com/GPX/1/0/gpx.xsd')
         doctime = ET.SubElement(self.root, 'time')
@@ -43,7 +43,7 @@ class GpxDoc(object):
         self.track = ET.SubElement(self.root, 'trk')
         ET.SubElement(self.track, 'name').text = name
         ET.SubElement(self.track, 'number').text = '1'
-    
+
     def _updateBounds(self, lat, lon):
         if lat < self._bounds['minlat']:
             self._bounds['minlat'] = lat
@@ -53,12 +53,12 @@ class GpxDoc(object):
             self._bounds['minlon'] = lon
         if lon > self._bounds['maxlon']:
             self._bounds['maxlon'] = lon
-    
+
     @classmethod
     def _mktime(cls, timestamp):
         return time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime(timestamp))
 
-    def add_trackpoints(self, trackpoint, zoffset=0, extrude=True, 
+    def add_trackpoints(self, trackpoint, zoffset=0, extrude=True,
                         tessellate=True):
         if isinstance(trackpoint, tuple):
             trackpoint = [trackpoint]
@@ -73,7 +73,7 @@ class GpxDoc(object):
             ET.SubElement(trkpt, 'time').text = self._mktime(curtime)
             ET.SubElement(trkpt, 'sym').text = 'Waypoint'
             self._updateBounds(tp[0], tp[1])
-            
+
     def write(self, out):
         out.write('<?xml version="1.0" encoding="UTF-8"?>')
         bounds = ET.SubElement(self.root, 'bounds')

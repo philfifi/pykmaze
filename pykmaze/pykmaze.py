@@ -29,14 +29,14 @@ def show_trackpoints_catalog(cat):
             (tpent['id']+1,
              time.strftime('%Y-%m-%d', stime),
              time.strftime('%H:%M', stime),
-             time.strftime('%H:%M', 
+             time.strftime('%H:%M',
                            time.localtime(tpent['start']+tpent['time'])),
              tpent['duration'] and \
-                time.strftime('%Hh%Mm', 
+                time.strftime('%Hh%Mm',
                               time.localtime(tpent['duration']-3600)) or
                 '     -',
              tpent['distance']/1000.0,
-             tpent['altmin'] and '%6dm' % tpent['altmin'] or '      -', 
+             tpent['altmin'] and '%6dm' % tpent['altmin'] or '      -',
              tpent['altmax'] and '%6dm' % tpent['altmax'] or '      -')
 
 def parse_trim(trim_times):
@@ -89,7 +89,7 @@ def trim_trackpoints(track, tp, trims):
         if t_start <= pt <= t_end:
             ttp.append(p)
     return ttp
-    
+
 def haversine(pt1, pt2):
     (lat1, lon1) = map(math.radians, pt1[0:2])
     (lat2, lon2) = map(math.radians, pt2[0:2])
@@ -98,13 +98,13 @@ def haversine(pt1, pt2):
     # Equatorial radius  6,378.1 km
     # Polar radius       6,356.8 km
     dlat = lat2-lat1
-    dlon = lon2-lon1 
+    dlon = lon2-lon1
     a = math.sin(dlat/2) * math.sin(dlat/2) + \
-        math.cos(lat1) * math.cos(lat2) * math.sin(dlon/2) * math.sin(dlon/2) 
-    c = 2 * math.atan2(math.sqrt(a), math.sqrt(1-a)) 
+        math.cos(lat1) * math.cos(lat2) * math.sin(dlon/2) * math.sin(dlon/2)
+    c = 2 * math.atan2(math.sqrt(a), math.sqrt(1-a))
     d = R * c
     return d
-    
+
 def cartesian(point):
     lat = math.radians(point[0])
     lon = math.radians(point[1])
@@ -117,7 +117,7 @@ def cartesian(point):
 
 def dotproduct(a,b):
     return sum((a[0]*b[0],a[1]*b[1],a[2]*b[2]))
-    
+
 def delta(c1, c2, c3):
     (x1,y1,z1) = c1
     (x2,y2,z2) = c2
@@ -155,7 +155,7 @@ if __name__ == '__main__':
     dbname = 'pykmaze.sqlite'
     dbpath = 'HOME' in os.environ and os.environ['HOME'] or '.'
     if sys.platform.lower() in ('darwin'):
-        dbpath = os.path.join(dbpath, 'Library', 'Application Support', 
+        dbpath = os.path.join(dbpath, 'Library', 'Application Support',
                               'Pykmaze', dbname)
     else:
         dbpath = os.path.join(dbpath, '.pykmaze', dbname)
@@ -176,33 +176,33 @@ if __name__ == '__main__':
                          help='Trim a track start[,end] with [+-]hh:mm:ss')
     optparser.add_option('-z', '--zoffset', dest='zoffset', default='0',
                          help='Offset to add on z-axis (meters)')
-    optparser.add_option('-s', '--storage', dest='storage', 
+    optparser.add_option('-s', '--storage', dest='storage',
                          default=dbpath,
                          help='Specify path for data storage (default: %s)' \
                                 % dbpath)
-    optparser.add_option('-o', '--offline', dest='offline', 
+    optparser.add_option('-o', '--offline', dest='offline',
                          action='store_true',
                          help='Offline (used cached information)')
-    optparser.add_option('-S', '--sync', dest='sync', 
+    optparser.add_option('-S', '--sync', dest='sync',
                          action='store_true',
                          help='Load all new tracks from device')
-    optparser.add_option('-f', '--force', dest='force', 
+    optparser.add_option('-f', '--force', dest='force',
                          action='store_true',
                          help='Force reload from device')
-    optparser.add_option('-i', '--info', dest='info', 
+    optparser.add_option('-i', '--info', dest='info',
                          action='store_true',
                          help='Show owner information')
-    optparser.add_option('-c', '--catalog', dest='catalog', 
+    optparser.add_option('-c', '--catalog', dest='catalog',
                          action='store_true',
                          help='Show track catalog')
-    optparser.add_option('-t', '--track', dest='track', 
+    optparser.add_option('-t', '--track', dest='track',
                          help='Retrieve trackpoint for specified track')
     optparser.add_option('-m', '--mode', dest='mode', choices=modes,
                          help='Use show mode among [%s]' % ','.join(modes),
                          default=modes[0])
-    
+
     (options, args) = optparser.parse_args(sys.argv[1:])
-    
+
     log = logging.getLogger('pykmaze')
     log.setLevel(logging.DEBUG)
     ch = logging.StreamHandler()
@@ -210,7 +210,7 @@ if __name__ == '__main__':
     formatter = logging.Formatter("%(levelname)s - %(message)s")
     ch.setFormatter(formatter)
     log.addHandler(ch)
-    
+
     try:
         if options.force and options.offline:
             raise AssertionError('Force and offline modes are mutually '
@@ -229,11 +229,11 @@ if __name__ == '__main__':
             print ' Owner:  %s' % info['user']
             print ' S/N:    %s' % info['serialnumber']
             print ''
-        
+
         device = cache.get_device(info['serialnumber'])
-        
+
         tpcat = cache.get_trackpoint_catalog(device)
-        
+
         if options.sync:
             reload_cache = False
             for tp in tpcat:
@@ -244,11 +244,11 @@ if __name__ == '__main__':
                     reload_cache = True
             if reload_cache:
                 tpcat = cache.get_trackpoint_catalog(device)
-                    
+
         if options.catalog:
             show_trackpoints_catalog(tpcat)
             print ''
-        
+
         if options.track:
             tracks = []
             if options.track in ['all']:
@@ -259,7 +259,7 @@ if __name__ == '__main__':
             else:
                 for tp in tpcat:
                     track = int(options.track)-1
-                    if int(tp['id']) == track: 
+                    if int(tp['id']) == track:
                         tracks = [tp['track']]
                         break
                 if not tracks:
@@ -275,9 +275,9 @@ if __name__ == '__main__':
                     from kml import KmlDoc
                 if options.gpx:
                     from gpx import GpxDoc
-                    
+
                 if km or options.gpx:
-                    track_info = filter(lambda x: x['track'] == track, 
+                    track_info = filter(lambda x: x['track'] == track,
                                         tpcat)[0]
                     if options.trim:
                         trims = parse_trim(options.trim.split(','))
@@ -285,11 +285,11 @@ if __name__ == '__main__':
                         tpoints = trim_trackpoints(track_info, tpoints, trims)
                         log.info('Filtered points: %d' % len(tpoints))
                     optpoints = optimize(tpoints, 0)
-                    log.info('Count: %u, opt: %u', 
+                    log.info('Count: %u, opt: %u',
                               len(tpoints), len(optpoints))
                 if km:
                     kml = KmlDoc(os.path.splitext(os.path.basename(km))[0])
-                    kml.add_trackpoints(optpoints, int(options.zoffset), 
+                    kml.add_trackpoints(optpoints, int(options.zoffset),
                                         extrude='air' not in options.mode)
                 if options.kmz:
                     import zipfile
@@ -297,14 +297,14 @@ if __name__ == '__main__':
                     out = StringIO.StringIO()
                     kml.write(out)
                     out.write('\n')
-                    z = zipfile.ZipFile(options.kmz, 'w', 
+                    z = zipfile.ZipFile(options.kmz, 'w',
                                         zipfile.ZIP_DEFLATED)
                     z.writestr('doc.kml', out.getvalue())
                 if options.kml:
                     with open(options.kml, 'wt') as out:
                         kml.write(out)
                         out.write('\n')
-                
+
                 if options.gpx:
                     gpx = GpxDoc(os.path.splitext( \
                                  os.path.basename(options.gpx))[0],
@@ -313,7 +313,7 @@ if __name__ == '__main__':
                     with open(options.gpx, 'wt') as out:
                         gpx.write(out)
                         out.write('\n')
-                        
+
     except AssertionError, e:
         print >> sys.stderr, 'Error: %s' % e[0]
 

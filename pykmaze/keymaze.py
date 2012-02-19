@@ -3,10 +3,10 @@
 #-----------------------------------------------------------------------------
 # @author Emmanuel Blot <manu.blot@gmail.com> (c) 2009
 # @license MIT License, see LICENSE file
-# @note The communication protocol here has been fully reverse-engineered from 
+# @note The communication protocol here has been fully reverse-engineered from
 #       the serial data stream initiated from the Windows (c) GUI application.
-#       It is likely to be incomplete or not fully understood. Support for 
-#       Keymaze 700 is uncertain, as it has not been tested. Feedback is 
+#       It is likely to be incomplete or not fully understood. Support for
+#       Keymaze 700 is uncertain, as it has not been tested. Feedback is
 #       warmly welcomed
 #-----------------------------------------------------------------------------
 
@@ -26,25 +26,25 @@ class KeymazePort(object):
     encapsulated into USB packets, thanks to a PL-2303 Prolific Serial-to-USB
     chip, embedded within the provided data cable
     """
-    
+
     KM_BAUDRATE = 57600
     NMEA_BAUDRATE = 4800
-    
+
     CMD_PREFIX = 0x02
     FW_PREFIX = 0x11
-    
+
     CMD_TP_DIR = 0x78
     CMD_TP_GET_HDR = 0x80
     CMD_TP_GET_NEXT = 0x81
     CMD_INFO_GET = 0x85
     ACK_TP_GET_NONE = 0x8a
-    
+
     # Note: device use big-endian encoding
     TP_CAT_FMT = '3B3BBIIHHBB2h3H'  # 31
     TP_HDR_FMT = 'IIIHHBBI'         # 22
     TP_ENT_FMT = 'iihHHB'           # 15
-    INFO_FMT = '12s13x17s11sBBxBxBxBxBx3x3B16x' 
-    
+    INFO_FMT = '12s13x17s11sBBxBxBxBxBx3x3B16x'
+
     def __init__(self, log, portname):
         self.log = log
         try:
@@ -65,11 +65,11 @@ class KeymazePort(object):
         self._port.setRTS(level=0)
         self._port.setDTR(level=0)
         self._drain()
-            
+
     def close(self):
         if self._port and self._port.isOpen:
             self._port.close()
-    
+
     def get_information(self):
         """Obtaint the device information"""
         (resp, ack) = self._request_device(self.CMD_INFO_GET)
@@ -87,7 +87,7 @@ class KeymazePort(object):
                  'height' : height,
                  'birthday' : datetime.date(1792+y,1+m,d) }
         return info
-            
+
     def get_trackpoint_catalog(self):
         """Obtain the catalog of all stored trackpoints ('activities')"""
         (resp, ack) = self._request_device(self.CMD_TP_DIR)
@@ -123,18 +123,18 @@ class KeymazePort(object):
                    'cmlmin' : cmd,
                    'track': track,
                    'id': idx }
-            trackpoints.append(tp) 
+            trackpoints.append(tp)
             start = end
         return trackpoints
-        
+
     def get_trackpoints(self, track):
         """Obtain the trackpoints of an activity"""
-        (resp, ack) = self._request_device(self.CMD_TP_GET_HDR, 
+        (resp, ack) = self._request_device(self.CMD_TP_GET_HDR,
                                            struct.pack('>HH', 1, track))
         trackpoints = []
         start = 0
         # New catatalog entry
-        end = start+struct.calcsize('>%s%s' % (self.TP_CAT_FMT, 
+        end = start+struct.calcsize('>%s%s' % (self.TP_CAT_FMT,
                                                self.TP_HDR_FMT))
         if end > len(resp):
             raise AssertionError('Missing data in response %d / %d' % \
@@ -143,7 +143,7 @@ class KeymazePort(object):
         # discovered, decoded here into the silent variable '_'
         (yy,mm,dd,hh,mn,ss,lap,dtime,dst,kcal,mspd,mhr,ahr,cmi,cmd,_,
          track,idx,stop,ttime,tdst,tkcal,tmspd,tmhr,tahr,count) = \
-            struct.unpack('>%s%s' % (self.TP_CAT_FMT, self.TP_HDR_FMT), 
+            struct.unpack('>%s%s' % (self.TP_CAT_FMT, self.TP_HDR_FMT),
                           resp[start:end])
         if lap > 1:
             raise AssertionError('Multi-lap entries not supported')
@@ -176,7 +176,7 @@ class KeymazePort(object):
             start = end
             points = []
             while start+entry_len <= len(resp):
-                (x,y,z,s,h,d) = struct.unpack('>%s' % self.TP_ENT_FMT, 
+                (x,y,z,s,h,d) = struct.unpack('>%s' % self.TP_ENT_FMT,
                                               resp[start:start+entry_len])
                 points.append((x,y,z,s,h,d))
                 rem_tp -= 1
@@ -184,7 +184,7 @@ class KeymazePort(object):
             tp['points'].extend(points)
             pc = (50*(count-rem_tp))/count
             progress = '%s%s: %d%%' % ('+'*pc, '.'*(50-pc), 2*pc)
-            print 'TP: ', progress, '\r', 
+            print 'TP: ', progress, '\r',
             sys.stdout.flush()
             if start < len(resp):
                 self.log.error("Remaining bytes: %s" % hexdump(resp[start:]))
@@ -231,7 +231,7 @@ class KeymazePort(object):
             raise AssertionError('Comm. error, checksum error 0x%02x/0x%02x' \
                                     % (rcksum, dcksum))
         return (resp, cmd)
-    
+
     def _calc_checksum(self, *args):
         """Compute the (NMEA) checksum for an outgoing packet"""
         cksum = 0x0
