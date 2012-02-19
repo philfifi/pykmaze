@@ -9,8 +9,8 @@
 
 from __future__ import with_statement
 from optparse import OptionParser
-from db import KeymazeCache
-from keymaze import KeymazePort
+from pykmaze.db import KeymazeCache
+from pykmaze.keymaze import KeymazePort
 import datetime
 import logging
 import math
@@ -272,9 +272,9 @@ if __name__ == '__main__':
             if len(tracks) == 1:
                 km = options.kml or options.kmz
                 if km:
-                    from kml import KmlDoc
+                    from pykmaze.kml import KmlDoc
                 if options.gpx:
-                    from gpx import GpxDoc
+                    from pykmaze.gpx import GpxDoc
 
                 if km or options.gpx:
                     track_info = filter(lambda x: x['track'] == track,
